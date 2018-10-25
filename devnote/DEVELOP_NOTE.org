@@ -1,0 +1,59 @@
+* Tvrockの予約リストをGoogle Calendarへ登録する。
+
+** セットアップ
+
+1. https://developers.google.com/calendar/quickstart/nodejs を参考にして credentials.jsonを用意する。
+
+   #+BEGIN_SRC json
+{"installed":{
+  "client_id":"************-********************************.apps.googleusercontent.com",
+  "project_id":"tvrock2gcal-*************",
+  "auth_uri":"https://accounts.google.com/o/oauth2/auth",
+  "token_uri":"https://www.googleapis.com/oauth2/v3/token",
+  "auth_provider_x509_cert_url":"https://www.googleapis.com/oauth2/v1/certs",
+  "client_secret":"************************",
+  "redirect_uris":["urn:ietf:wg:oauth:2.0:oob","http://localhost"]
+}}
+#+END_SRC
+
+2. index.js の URL と CALENDAR_ID を設定する。
+
+3. 試しにnpm startして認証トークンを得る。
+
+
+** 番組表の構造
+
+(注:見やすいように後から改行を挿入したが、実際は1行)
+
+<tr>
+<td align=center width=3% bgcolor=#f8f8ff><small><font color=#484858>1</font></small></td>
+<td align=center width=3% bgcolor=#f8f8ff><small><font color=#484858><a href="list?i=1537974083575&val=2">○</a></font></small></td>
+<td align=center width=10% bgcolor=#f8f8ff><small><font color=#484858>HIIRAGI2</font></small></td>
+<td align=center width=3% bgcolor=#f8f8ff><small><font color=#484858>T1</font></small></td>
+<td align=center width=3% bgcolor=#f8f8ff><small><font color=#484858>追</font></small></td>
+<td align=center width=3% bgcolor=#f8f8ff><small><font color=#484858>↓</font></small></td>
+<td align=center width=3% bgcolor=#f8f8ff><small><font color=#484858>両</font></small></td>
+<td align=center width=2% bgcolor=#f8f8ff><a href="kwl?i=-1602910782"><small><font color=#484858>★</font></small></a></td>
+<td align=center width=25% bgcolor=#f8f8ff><a href="day?t=0&b=0&p=0#hour21"><small><font color=#484858>9月28日(金) 21:54～22:00</font></small></a></td>
+<td align=center width=10% bgcolor=#f8f8ff><a href="http://www.google.co.jp/search?hl=ja&btnI=1&q=ＴＯＫＹＯ　ＭＸ" target="_blank"><small><font color=#484858>ＴＯＫＹＯ　ＭＸ</font></small></a></td>
+<td align=center width=35% bgcolor=#f8f8ff><a href="reg?i=1537974083575"><small><font color=#484858><b>働くお兄さん!の2!　★セレクション放送　#4「カフェのお兄さん!」</b></font></small></a><a href="http://www.google.co.jp/search?hl=ja&btnI=1&q=%93%ad%82%ad%82%a8%8c%5a%82%b3%82%f1%21%82%cc%32%21%81%40%81%9a%83%5a%83%8c%83%4e%83%56%83%87%83%93%95%fa%91%97%81%40" target="_blank"><img src="img?n=24" border=0 align=absbottom></a><a href="http://twitter.com/#search?q=twr5c3823ee" target="_blank"><img src="img?n=67" border=0 align=absbottom></a></td>
+</tr>
+
+正規表現にすると
+
+<tr>
+<td[^>]*><small><font[^>]*>[^<]*</font></small></td>
+<td[^>]*><small><font[^>]*><a [^>]*>[^<]*</a></font></small></td>
+<td[^>]*><small><font[^>]*>[^<]*</font></small></td>
+<td[^>]*><small><font[^>]*>[^<]*</font></small></td>
+<td[^>]*><small><font[^>]*>[^<]*</font></small></td>
+<td[^>]*><small><font[^>]*>[^<]*</font></small></td>
+<td[^>]*><small><font[^>]*>[^<]*</font></small></td>
+<td[^>]*><small><font[^>]*>[^<]*</font></small></td>
+<td[^>]*><a [^>]*><small><font[^>]*>(\d+)月(\d+)日\(.\) (\d+:\d+)～(\d+:\d+)</font></small></a></td>
+<td[^>]*><a [^>]*><small><font[^>]*>[^<]*</font></small></a></td>
+<td[^>]*><a [^>]*><small><font[^>]*><b>([^<]+)</b></font></small>
+
+いや、正規表現にするよりも、大人しくsplitでtrごと、tdごと切り分けた方が早そう。
+
+ということで parseTvrockListHtml はそのような実装になっている。

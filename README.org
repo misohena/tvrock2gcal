@@ -1,0 +1,30 @@
+* TvRockの予約リストをGoogle Calendarへ登録する
+
+** セットアップ
+
+1. https://developers.google.com/calendar/quickstart/nodejs を参考にして credentials.json を用意する。
+
+#+BEGIN_SRC json
+{"installed":{
+  "client_id":"hogehogehogehoge.apps.googleusercontent.com",
+  "project_id":"tvrock2gcal-hogehogehoge",
+  "auth_uri":"https://accounts.google.com/o/oauth2/auth",
+  "token_uri":"https://www.googleapis.com/oauth2/v3/token",
+  "auth_provider_x509_cert_url":"https://www.googleapis.com/oauth2/v1/certs",
+  "client_secret":"hogehogehogehoge",
+  "redirect_uris":["urn:ietf:wg:oauth:2.0:oob","http://localhost"]
+}}
+#+END_SRC
+
+2. config.jsを作る。
+
+#+BEGIN_SRC js
+module.exports = {
+    url: "http://localhost:8969/nobody/list",
+    calendar_id: "hogehogehoge@group.calendar.google.com"
+};
+#+END_SRC
+
+3. npm startして認証トークンを得る。
+
+手動で実行してGoogle Calendarへアクセスするための認証トークンを取得し、入力する。
