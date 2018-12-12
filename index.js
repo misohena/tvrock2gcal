@@ -45,7 +45,7 @@ function parseTvrockListHtml(body)
 {
     const DATETIME_REGEXP = new RegExp("<font[^>]*>(\\d+)月(\\d+)日\\(.\\) (\\d+):(\\d+)～(\\d+):(\\d+)</font>");
     const CHANNEL_REGEXP = new RegExp("<font[^>]*>([^<]*)</font>");
-    const TITLE_REGEXP = new RegExp("<font[^>]*><b>([^<]+)</b></font>");
+    const TITLE_REGEXP = new RegExp("<font[^>]*><b>(.*?)</b></font>");
 
     // split tr
     const trs = body.split(/<tr ?[^>]*>/);
