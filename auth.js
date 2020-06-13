@@ -30,12 +30,23 @@ function authorize() {
                     client_id, client_secret, redirect_uris[0]);
 
                 // Check if we have previously stored a token.
-                fs.readFile(TOKEN_PATH, (err, token) => {
+                fs.readFile(TOKEN_PATH, (err, tokenBuffer) => {
                     if(err){
                         getAccessToken(oAuth2Client, resolve, reject);
                     }
                     else{
-                        oAuth2Client.setCredentials(JSON.parse(token));
+                        const token = JSON.parse(tokenBuffer);
+                        oAuth2Client.on('tokens', (newToken) => {
+                            console.log("new token : " + JSON.stringify(newToken));
+                            token.access_token = newToken.access_token;
+                            token.expiry_date = newToken.expiry_date;
+                            if(newToken.refresh_token) {
+                                token.refresh_token = newToken.refresh_token;
+                            }
+                            writeTokenToFile(token);
+                        });
+
+                        oAuth2Client.setCredentials(token);
                         resolve(oAuth2Client);
                     }
                 });
@@ -71,13 +82,22 @@ function getAccessToken(oAuth2Client, resolve, reject) {
             else{
                 oAuth2Client.setCredentials(token);
                 // Store the token to disk for later program executions
-                fs.writeFile(TOKEN_PATH, JSON.stringify(token), (err) => {
-                    if(err) console.error(err);
-                    console.log('Token stored to', TOKEN_PATH);
-                });
+                writeTokenToFile(token);
                 resolve(oAuth2Client);
             }
         });
+    });
+}
+
+function writeTokenToFile(token){
+    fs.writeFile(TOKEN_PATH, JSON.stringify(token), (err) => {
+        if(err){
+            console.log('Failed to write token to ', TOKEN_PATH);
+            console.error(err);
+        }
+        else{
+            console.log('Token stored to', TOKEN_PATH);
+        }
     });
 }
 
